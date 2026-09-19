@@ -19,18 +19,6 @@
  * ============================================================================
  */
 
-// ❌ MAL APLICADO: carga manual. Cada clase nueva obliga a editar este archivo.
-require_once __DIR__ . '/../src/Database/Connection.php';
-require_once __DIR__ . '/../src/Models/Order.php';
-require_once __DIR__ . '/../src/Pricing/PriceCalculator.php';
-require_once __DIR__ . '/../src/Notifications/EmailNotification.php';
-require_once __DIR__ . '/../src/Notifications/SmsNotification.php';
-require_once __DIR__ . '/../src/Notifications/NotificationSender.php';
-require_once __DIR__ . '/../src/Legacy/LegacyNotifier.php';
-require_once __DIR__ . '/../src/Reports/ReportGenerator.php';
-require_once __DIR__ . '/../src/Events/OrderEvents.php';
-require_once __DIR__ . '/../src/Services/OrderService.php';
-require_once __DIR__ . '/../src/Controllers/OrderController.php';
 
 /*
  * ✅ FORMA CORRECTA (reemplaza a los 11 require de arriba):
@@ -42,6 +30,7 @@ require_once __DIR__ . '/../src/Controllers/OrderController.php';
  *     }
  * });
  */
+
 
 // ❌ MAL APLICADO: credenciales en el código fuente y dentro del repositorio.
 //    Si el repo es público, la credencial es pública.
