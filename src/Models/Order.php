@@ -59,13 +59,7 @@ class Order
      *    Dos motivos de cambio distintos viven en la misma clase (viola SRP).
      *    Ademas el SQL se arma por concatenacion => inyeccion SQL.
      */
-    public function guardar(): void
-    {
-        $conexion = Connection::obtener();
-        $conexion->ejecutar(
-            "INSERT INTO orders (id, patient, amount) VALUES ({$this->id}, '{$this->patient}', {$this->amount})"
-        );
-    }
+    
 
     /*
      * ✅ FORMA CORRECTA: sacar la persistencia del modelo.
