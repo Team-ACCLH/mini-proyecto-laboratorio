@@ -1,23 +1,24 @@
 <?php
+
 /**
  * ============================================================================
- *  CONTROLADOR DE PEDIDOS
- *  Patron esperado: MVC bien aplicado (arquitectonico) + SRP
+ * CONTROLADOR DE PEDIDOS
+ * Patron esperado: MVC bien aplicado (arquitectonico) + SRP
  * ============================================================================
  *
- *  ❌ DEUDA SEMBRADA — el "God Controller"
- *     1. Arma SQL directamente.
- *     2. Contiene reglas de negocio (descuentos).
- *     3. Imprime HTML con echo.
- *     4. Crea con new todas sus dependencias concretas.
- *     5. Repite por TERCERA vez el if de notificaciones.
+ * ❌ DEUDA SEMBRADA — el "God Controller"
+ *    1. Arma SQL directamente.
+ *    2. Contiene reglas de negocio (descuentos).
+ *    3. Imprime HTML con echo.
+ *    4. Crea con new todas sus dependencias concretas.
+ *    5. Repite por TERCERA vez el if de notificaciones.
  *
- *  Tener las carpetas /Controllers /Models /views NO significa aplicar MVC.
- *  MVC es separacion de responsabilidades, no estructura de directorios.
+ * Tener las carpetas /Controllers /Models /views NO significa aplicar MVC.
+ * MVC es separacion de responsabilidades, no estructura de directorios.
  *
- *  ✅ FORMA CORRECTA
- *     El controlador solo: recibe la entrada, la valida como entrada,
- *     llama a UN servicio o fachada, y elige que vista renderizar.
+ * ✅ FORMA CORRECTA
+ *    El controlador solo: recibe la entrada, la valida como entrada,
+ *    llama a UN servicio o fachada, y elige que vista renderizar.
  * ============================================================================
  */
 
@@ -40,42 +41,42 @@ class OrderController
 
         // ❌ 3. SQL dentro del controlador (deberia ser Repository)
         $conexion = Connection::obtener();
-        $conexion->ejecutar("INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})");
+        $conexion->ejecutar(
+            "INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})"
+        );
 
         // ❌ 4. Notificacion resuelta otra vez con if (deberia ser Factory)
         $notificador = new NotificationSender();
-        $notificador->enviar('email', 'paciente@mail.com', "Pedido {$id} creado");
+        $notificador->enviar(
+            'email',
+            'paciente@mail.com',
+            "Pedido {$id} creado"
+        );
 
         // ❌ 5. HTML impreso desde el controlador (deberia ser una View)
         echo "<h1>Pedido creado</h1>";
-        echo "<p>Paciente: {$paciente}</p>";       // ❌ ademas, sin escapar: XSS
+        echo "<p>Paciente: {$paciente}</p>";
         echo "<p>Total: $ {$total}</p>";
     }
 
-    /*
-     * ✅ FORMA CORRECTA:
-     *
-     * public function create(): void
-     * {
-     *     $order = new Order(
-     *         (int) $_POST['id'],
-     *         (string) $_POST['paciente'],
-     *         (float) $_POST['monto'],
-     *         (string) $_POST['tipo']
-     *     );
-     *
-     *     $this->facade->createOrder($order);          // toda la logica, una linea
-     *
-     *     require __DIR__ . '/../../views/orders.php'; // la vista solo presenta
-     * }
-     */
-
     /**
-     * ❌ METODO MAL APLICADO: index()
-     *    Delega en la vista la consulta a la base de datos (ver views/orders.php).
+     * ✅ La vista recibe los datos preparados desde el controlador.
      */
     public function index(): void
     {
+        $pedidos = [
+            [
+                'id' => 1,
+                'paciente' => 'Juan Perez',
+                'total' => 10500
+            ],
+            [
+                'id' => 2,
+                'paciente' => 'Ana Gomez',
+                'total' => 22000
+            ],
+        ];
+
         require __DIR__ . '/../../views/orders.php';
     }
 
@@ -86,11 +87,17 @@ class OrderController
     public function report(): void
     {
         $generador = new ReportGenerator();
-        echo $generador->generate('Pedidos del dia', true, true, true);
+
+        echo $generador->generate(
+            'Pedidos del dia',
+            true,
+            true,
+            true
+        );
     }
 }
 
-/*
+/**
  * ----------------------------------------------------------------------------
  * EJERCICIO 7 (TP): dejar create() con un maximo de 5 lineas ejecutables,
  * sin SQL, sin reglas de negocio y sin echo.
