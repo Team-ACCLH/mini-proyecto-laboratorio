@@ -1,9 +1,13 @@
 <?php
 
-namespace Src\Events;
+// Mientras no este el autoload (PR #4), el sujeto carga sus observadores.
+require_once __DIR__ . '/EmailObserver.php';
+require_once __DIR__ . '/SmsObserver.php';
+require_once __DIR__ . '/DashboardObserver.php';
 
 final class OrderEvents
 {
+    /** @var OrderObserver[] coleccion de INTERFACES, no de clases concretas */
     private array $observers = [];
 
     // Permite añadir dinámicamente cualquier observador nuevo en el futuro
@@ -12,12 +16,11 @@ final class OrderEvents
         $this->observers[] = $observer;
     }
 
-    // El método central que dispara los avisos desatados
-    public function detenerYNotificar(array $orderData): void
+    // Recorre todos los suscriptores y les avisa de forma polimórfica
+    public function notify(Order $order): void
     {
-        // Recorre todos los suscriptores y les avisa de forma polimórfica
         foreach ($this->observers as $observer) {
-            $observer->update($orderData);
+            $observer->update($order);
         }
     }
 }

@@ -1,8 +1,7 @@
 <?php
 
-namespace Src\Events;
-
+/** Contrato de quien quiere enterarse de que se creo un pedido. */
 interface OrderObserver
 {
-    public function update(array $orderData): void;
+    public function update(Order $order): void;
 }
