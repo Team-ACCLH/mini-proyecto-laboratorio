@@ -1,7 +1,5 @@
 <?php
 
-namespace Src\Pricing;
-
 final class InsuranceStrategy implements PricingStrategy
 {
     public function __construct(private float $discount = 0.30) {}

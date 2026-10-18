@@ -1,7 +1,5 @@
 <?php
 
-namespace Src\Pricing;
-
 final class PrepaidStrategy implements PricingStrategy
 {
     public function calculate(float $amount): float

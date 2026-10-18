@@ -1,7 +1,5 @@
 <?php
 
-namespace Src\Pricing;
-
 final class PriceCalculator
 {
     // COMPOSICION: La calculadora TIENE una estrategia inyectada
