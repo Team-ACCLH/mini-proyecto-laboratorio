@@ -19,24 +19,38 @@
  * ============================================================================
  */
 
+// ❌ MAL APLICADO: carga manual. Cada clase nueva obliga a editar este archivo.
+require_once __DIR__ . '/../src/Database/Connection.php';
+require_once __DIR__ . '/../src/Models/Order.php';
+require_once __DIR__ . '/../src/Pricing/PriceCalculator.php';
+require_once __DIR__ . '/../src/Notifications/EmailNotification.php';
+require_once __DIR__ . '/../src/Notifications/SmsNotification.php';
+require_once __DIR__ . '/../src/Notifications/NotificationSender.php';
+require_once __DIR__ . '/../src/Legacy/LegacyNotifier.php';
+require_once __DIR__ . '/../src/Reports/ReportGenerator.php';
+require_once __DIR__ . '/../src/Events/OrderEvents.php';
+require_once __DIR__ . '/../src/Services/OrderService.php';
+require_once __DIR__ . '/../src/Controllers/OrderController.php';
 
-✅ FORMA CORRECTA (reemplaza a los 11 require de arriba):
+/*
+ * ✅ FORMA CORRECTA (reemplaza a los 11 require de arriba):
+ *
+ * spl_autoload_register(function (string $class): void {
+ *     $file = __DIR__ . '/../src/' . str_replace('\\', '/', $class) . '.php';
+ *     if (is_file($file)) {
+ *         require_once $file;
+ *     }
+ * });
+ */
 
- spl_autoload_register(function (string $class): void {
-     $file = __DIR__ . '/../src/' . str_replace('\\', '/', $class) . '.php';
-     if (is_file($file)) {
-         require_once $file;
-     }
- });
+// ✅ Configuracion externa: las credenciales viven en config/database.php,
+//    que esta en .gitignore. El repo solo versiona config/database.example.php.
+//    Si todavia no se creo el archivo local, se usa la plantilla (valores vacios)
+//    para que la demo arranque igual sin MySQL.
+$configLocal = __DIR__ . '/../config/database.php';
+$config = require (is_file($configLocal) ? $configLocal : __DIR__ . '/../config/database.example.php');
 
-
- ✅ FORMA CORRECTA:
-$config = require __DIR__ . '/../config/database.php';   
-   // ignorado por git  El repositorio versiona config/database.example.php con valores vacíos.
 $accion = $_GET['accion'] ?? 'crear';
-
-
-
 
 // ❌ MAL APLICADO: ruteo con if encadenados. Viola Abierto/Cerrado:
 //    cada pantalla nueva obliga a MODIFICAR este bloque.
