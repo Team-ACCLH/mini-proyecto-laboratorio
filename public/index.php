@@ -19,18 +19,15 @@
  * ============================================================================
  */
 
-
-/*
- * ✅ FORMA CORRECTA (reemplaza a los 11 require de arriba):
- *
- * spl_autoload_register(function (string $class): void {
- *     $file = __DIR__ . '/../src/' . str_replace('\\', '/', $class) . '.php';
- *     if (is_file($file)) {
- *         require_once $file;
- *     }
- * });
- */
-
+// ✅ Autoload: cada clase se carga sola la primera vez que se usa.
+//    Las clases no tienen namespace, asi que se busca el archivo
+//    <Clase>.php en las subcarpetas de src/ (Database, Models, ...).
+spl_autoload_register(function (string $class): void {
+    foreach (glob(__DIR__ . '/../src/*/' . $class . '.php') as $file) {
+        require_once $file;
+        return;
+    }
+});
 
 // ❌ MAL APLICADO: credenciales en el código fuente y dentro del repositorio.
 //    Si el repo es público, la credencial es pública.
