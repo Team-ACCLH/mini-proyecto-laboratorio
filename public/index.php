@@ -27,7 +27,6 @@ require_once __DIR__ . '/../src/Notifications/EmailNotification.php';
 require_once __DIR__ . '/../src/Notifications/SmsNotification.php';
 require_once __DIR__ . '/../src/Notifications/NotificationSender.php';
 require_once __DIR__ . '/../src/Legacy/LegacyNotifier.php';
-require_once __DIR__ . '/../src/Reports/ReportGenerator.php';
 require_once __DIR__ . '/../src/Events/OrderEvents.php';
 require_once __DIR__ . '/../src/Services/OrderService.php';
 require_once __DIR__ . '/../src/Controllers/OrderController.php';
