@@ -1,8 +1,8 @@
 <?php
 
-namespace Src\Notifications;
-
-use InvalidArgumentException;
+// Mientras no este el autoload (PR #4), la fabrica carga sus propios canales.
+require_once __DIR__ . '/EmailChannel.php';
+require_once __DIR__ . '/SmsChannel.php';
 
 final class NotificationFactory
 {

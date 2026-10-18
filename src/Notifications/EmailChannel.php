@@ -1,12 +1,11 @@
 <?php
 
-namespace Src\Notifications;
+require_once __DIR__ . '/NotificationChannel.php';
 
 final class EmailChannel implements NotificationChannel
 {
     public function send(string $message, string $recipient): void
     {
-        // Aquí iría la lógica de Laravel para enviar un correo real
-        // Ej: Mail::to($recipient)->send(new GenericNotification($message));
+        echo "[EMAIL] para {$recipient} | Pedido del laboratorio: {$message}<br>";
     }
 }
