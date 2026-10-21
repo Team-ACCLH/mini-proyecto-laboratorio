@@ -4,23 +4,28 @@
  *  NOTIFICACION POR EMAIL
  * ============================================================================
  *
- *  Implementa Notification con el metodo send() definido por la interfaz.
- *  Antes tenia enviarEmail() con firma distinta a SmsNotification.
- *  Ahora ambas comparten el mismo contrato => polimorfismo.
+ *  ❌ DEUDA SEMBRADA
+ *     Esta clase NO implementa ninguna interfaz.
+ *     Quien la usa depende de la clase concreta => acoplamiento fuerte.
+ *     El metodo se llama enviarEmail(); el de SMS se llama mandarSms().
+ *     Nombres distintos para la misma responsabilidad: imposible intercambiarlos.
+ *
+ *  ✅ FORMA CORRECTA
+ *     interface Notification { public function send(string $message): void; }
+ *     class EmailNotification implements Notification { public function send(...) }
+ *     Mismo contrato => polimorfismo => el cliente no conoce la clase concreta.
  * ============================================================================
  */
 
-class EmailNotification implements Notification
+class EmailNotification
 {
-    private string $destinatario;
-
-    public function __construct(string $destinatario = '')
+    /**
+     * ❌ METODO MAL APLICADO: enviarEmail()
+     *    El nombre y la firma son propios de esta clase.
+     *    ✅ Deberia llamarse send(string $message): void, definido por la interfaz.
+     */
+    public function enviarEmail(string $destinatario, string $asunto, string $cuerpo): void
     {
-        $this->destinatario = $destinatario;
-    }
-
-    public function send(string $message): void
-    {
-        echo "[EMAIL] para {$this->destinatario}: {$message}<br>";
+        echo "[EMAIL] para {$destinatario} | {$asunto}: {$cuerpo}<br>";
     }
 }

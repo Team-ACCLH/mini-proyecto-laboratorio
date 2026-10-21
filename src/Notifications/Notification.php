@@ -7,7 +7,7 @@
  *  Interfaz comun para todas las notificaciones.
  *  Permite polimorfismo: el cliente no conoce la clase concreta.
  *
- *  Implementada por: EmailNotification, SmsNotification, LegacyNotifierAdapter
+ *  Implementada por: LegacyNotifierAdapter
  * ============================================================================
  */
 

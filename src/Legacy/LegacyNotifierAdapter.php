@@ -16,6 +16,10 @@
  * ============================================================================
  */
 
+// Mientras no este el autoload, el adapter carga su contrato y la clase que adapta.
+require_once __DIR__ . '/../Notifications/Notification.php';
+require_once __DIR__ . '/LegacyNotifier.php';
+
 class LegacyNotifierAdapter implements Notification
 {
     /** COMPOSICION: el adapter TIENE el sistema viejo adentro */
@@ -23,7 +27,7 @@ class LegacyNotifierAdapter implements Notification
 
     /**
      * Traduce Notification::send() → LegacyNotifier::sendMessage()
-     * Unica punto de traduccion en todo el sistema.
+     * Unico punto de traduccion en todo el sistema.
      */
     public function send(string $message): void
     {

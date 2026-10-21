@@ -4,23 +4,26 @@
  *  NOTIFICACION POR SMS
  * ============================================================================
  *
- *  Implementa Notification con el metodo send() definido por la interfaz.
- *  Antes tenia mandarSms() con firma distinta a EmailNotification.
- *  Ahora ambas comparten el mismo contrato => polimorfismo.
+ *  ❌ DEUDA SEMBRADA
+ *     Misma responsabilidad que EmailNotification pero con OTRA firma:
+ *        EmailNotification::enviarEmail($destinatario, $asunto, $cuerpo)
+ *        SmsNotification::mandarSms($numero, $texto)
+ *     Al no compartir contrato, el cliente necesita un if por cada tipo.
+ *     Ese if es exactamente la deuda que despues repara Factory.
+ *
+ *  ✅ FORMA CORRECTA
+ *     Ambas implementan Notification::send(string $message): void.
  * ============================================================================
  */
 
-class SmsNotification implements Notification
+class SmsNotification
 {
-    private string $numero;
-
-    public function __construct(string $numero = '')
+    /**
+     * ❌ METODO MAL APLICADO: mandarSms()
+     *    ✅ send(string $message): void, igual que el resto de las notificaciones.
+     */
+    public function mandarSms(string $numero, string $texto): void
     {
-        $this->numero = $numero;
-    }
-
-    public function send(string $message): void
-    {
-        echo "[SMS] a {$this->numero}: {$message}<br>";
+        echo "[SMS] a {$numero}: {$texto}<br>";
     }
 }
