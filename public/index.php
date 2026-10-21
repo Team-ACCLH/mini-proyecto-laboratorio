@@ -51,27 +51,14 @@ $config = require (is_file($configLocal) ? $configLocal : __DIR__ . '/../config/
 
 $accion = $_GET['accion'] ?? 'crear';
 
-// ❌ MAL APLICADO: ruteo con if encadenados. Viola Abierto/Cerrado:
-//    cada pantalla nueva obliga a MODIFICAR este bloque.
+// ✅ Tabla de rutas: agregar una pantalla es agregar una linea al array,
+//    sin modificar la logica que despacha (Abierto/Cerrado).
 $controller = new OrderController();
 
-if ($accion === 'crear') {
-    $controller->create();
-} elseif ($accion === 'listar') {
-    $controller->index();
-} elseif ($accion === 'reporte') {
-    $controller->report();
-} else {
-    echo 'Accion no encontrada';
-}
+$rutas = [
+    'crear'   => fn() => $controller->create(),
+    'listar'  => fn() => $controller->index(),
+    'reporte' => fn() => $controller->report(),
+];
 
-/*
- * ✅ FORMA CORRECTA: tabla de rutas. Agregar una pantalla ya no modifica el if.
- *
- * $rutas = [
- *     'crear'   => fn() => $controller->create(),
- *     'listar'  => fn() => $controller->index(),
- *     'reporte' => fn() => $controller->report(),
- * ];
- * ($rutas[$accion] ?? fn() => http_response_code(404))();
- */
+($rutas[$accion] ?? fn() => print 'Accion no encontrada')();
