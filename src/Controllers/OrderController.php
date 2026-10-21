@@ -1,4 +1,10 @@
 <?php
+
+// Mientras no este el autoload (PR #4), se cargan a mano los decoradores que usa este archivo.
+require_once __DIR__ . '/../Reports/BasicReport.php';
+require_once __DIR__ . '/../Reports/DigitalSignatureDecorator.php';
+require_once __DIR__ . '/../Reports/PdfReportDecorator.php';
+require_once __DIR__ . '/../Reports/WatermarkDecorator.php';
 /**
  * ============================================================================
  *  CONTROLADOR DE PEDIDOS
@@ -39,7 +45,7 @@ class OrderController
         $total = $tipo === 'obra_social' ? $monto * 0.7 : $monto;
 
         // ❌ 3. SQL dentro del controlador (deberia ser Repository)
-        $conexion = Connection::obtener();
+        $conexion = Connection::getInstance();
         $conexion->ejecutar("INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})");
 
         // ❌ 4. Notificacion resuelta otra vez con if (deberia ser Factory)
@@ -80,13 +86,18 @@ class OrderController
     }
 
     /**
-     * ❌ METODO MAL APLICADO: report()
-     *    Usa banderas booleanas ilegibles (ver ReportGenerator).
+     * ✅ report(): el reporte se arma encadenando decoradores,
+     *    sin banderas booleanas.
      */
     public function report(): void
     {
-        $generador = new ReportGenerator();
-        echo $generador->generate('Pedidos del dia', true, true, true);
+        // Decorator: cada agregado envuelve al anterior. El orden importa.
+        $reporte = new WatermarkDecorator(
+            new PdfReportDecorator(
+                new DigitalSignatureDecorator(new BasicReport('Pedidos del dia'))
+            )
+        );
+        echo $reporte->generate();
     }
 }
 

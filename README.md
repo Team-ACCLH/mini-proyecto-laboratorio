@@ -97,3 +97,11 @@ El PR revisado por otro grupo es evidencia del TP Integrador.
   deuda nueva.
 - **Se documenta la consecuencia negativa.** Un patrón sin contras analizadas
   es sobreingeniería esperando su turno.
+
+---
+
+## Contributing
+
+| Integrante | Ejercicios | Ramas |
+|---|---|---|
+| Mauricio Cardozo | Ej. 3 (Adapter), Ej. 4 (Decorator) | `feat/patron-adapter`, `feat/patron-decorator` |
