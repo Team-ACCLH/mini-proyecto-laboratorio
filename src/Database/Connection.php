@@ -26,49 +26,33 @@ class Connection
     /** Almacen en memoria para poder correr la demo sin MySQL levantado. */
     private static array $tablaEnMemoria = [];
 
+    /** Unica instancia compartida por todo el request. */
+    private static ?Connection $instance = null;
+
     /**
-     * ❌ METODO MAL APLICADO: obtener()
-     *    Devuelve una instancia nueva cada vez que se lo llama.
-     *    Con 40 consultas por request, el sistema abre 40 conexiones.
+     * ✅ Constructor privado: nadie puede hacer new Connection() desde afuera
+     *    y romper la garantia de instancia unica.
      */
-    public static function obtener(): Connection
+    private function __construct()
     {
-        return new Connection();
     }
 
-    /*
-     * ✅ FORMA CORRECTA — Singleton:
-     *
-     * private static ?Connection $instance = null;
-     *
-     * private function __construct(private PDO $pdo) {}
-     *
-     * public static function getInstance(array $config): Connection
-     * {
-     *     if (self::$instance === null) {
-     *         $dsn = "mysql:host={$config['host']};dbname={$config['name']};charset=utf8mb4";
-     *         self::$instance = new Connection(
-     *             new PDO($dsn, $config['user'], $config['pass'], [
-     *                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-     *             ])
-     *         );
-     *     }
-     *     return self::$instance;
-     * }
-     *
-     * Ejercicio: por que el constructor tiene que ser private?
-     * Respuesta: para que nadie pueda hacer new Connection() desde afuera
-     * y romper la garantia de instancia unica.
-     */
+    /** ✅ Singleton: la primera llamada crea la conexion, las demas la reutilizan. */
+    public static function getInstance(): Connection
+    {
+        if (self::$instance === null) {
+            self::$instance = new Connection();
+        }
+        return self::$instance;
+    }
 
     public function ejecutar(string $sql): void
     {
         try {
             self::$tablaEnMemoria[] = $sql;
         } catch (Throwable $e) {
-            // ❌ MAL APLICADO: la excepcion se traga y el sistema sigue.
-            //    El pedido "se guardo" aunque no se guardo nada.
-            //    ✅ Loguear y relanzar: throw new RuntimeException('...', 0, $e);
+            // ✅ Fallar rapido y fuerte: si no se pudo guardar, el error se propaga.
+            throw new RuntimeException('No se pudo ejecutar la consulta: ' . $sql, 0, $e);
         }
     }
 
