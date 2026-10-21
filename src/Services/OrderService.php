@@ -1,4 +1,9 @@
 <?php
+
+// Mientras no este el autoload (PR #4), se cargan a mano los decoradores que usa este archivo.
+require_once __DIR__ . '/../Reports/BasicReport.php';
+require_once __DIR__ . '/../Reports/DigitalSignatureDecorator.php';
+require_once __DIR__ . '/../Reports/PdfReportDecorator.php';
 /**
  * ============================================================================
  *  SERVICIO DE PEDIDOS
@@ -81,8 +86,8 @@ class OrderService
         $eventos->pedidoCreado($order);
 
         // ---- 6. Reporte (deberia ser un Decorator) ----
-        $generador = new ReportGenerator();
-        echo $generador->generate("Pedido {$id}", true, true, false) . '<br>';
+        $reporte = new PdfReportDecorator(new DigitalSignatureDecorator(new BasicReport("Pedido {$id}")));
+        echo $reporte->generate() . '<br>';
 
         // ---- 7. Presentacion (deberia ser una View) ----
         echo "<p>Pedido {$id} procesado. Total: $ {$total}</p>";
