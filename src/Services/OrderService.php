@@ -1,4 +1,11 @@
 <?php
+
+namespace App\Services;
+use App\Pricing\PriceCalculator; 
+use App\Models\OrderRepository;
+use App\Notifications\NotificationSender; 
+use App\Events\OrderEvents;
+
 /**
  * ============================================================================
  *  SERVICIO DE PEDIDOS
@@ -21,107 +28,46 @@
  * ============================================================================
  */
 
+/** 
+ *class OrderService (fachada)
+ *
+ * Cumple con el pátron Facade y el principio de responsabilidad única (SRP):
+ * Coordina la creación de un pedido, delegando tareas a servicios especializados.
+ * para procesar un pedido en menos de 10 líneas de código.
+ */
+
 class OrderService
 {
-    /**
-     * ❌ METODO MAL APLICADO: procesarPedidoCompleto()
-     *    Sintomas medibles:
-     *      - mas de 6 responsabilidades en un solo metodo
-     *      - 4 niveles de anidamiento
-     *      - imposible de probar sin base de datos ni servidor de mail
-     *      - imprime HTML desde la capa de servicio (rompe MVC)
-     */
-    public function procesarPedidoCompleto(
-        int $id,
-        string $paciente,
-        float $monto,
-        string $tipoPaciente,
-        string $tipoNotificacion,
-        string $destino
-    ): void {
-        // ---- 1. Validacion (deberia estar en su propio validador) ----
-        if (trim($paciente) === '') {
-            echo 'Falta el paciente<br>';   // ❌ la capa de servicio imprime HTML
-            return;
-        }
 
-        if ($monto <= 0) {
-            echo 'Monto invalido<br>';
-            return;
-        }
+    public function __construct(
+        private PriceCalculator $priceCalculator,
+        private OrderRepository $orderRepository,
+        private NotificationSender $notificationSender,
+        private OrderEvents $orderEvents
+    ) {}
 
-        // ---- 2. Calculo de precio (deberia ser una Strategy) ----
-        $total = $monto;
+/**
+ * Procesa un pedido completo orquestando las capas correspondientes.
+ */
 
-        if ($tipoPaciente === 'obra_social') {
-            $total = $monto * 0.7;          // ❌ tercera copia del 0.7 en el proyecto
-        } elseif ($tipoPaciente === 'jubilado') {
-            $total = $monto * 0.5;
-        }
+public function processOrder(Order $order): void
+{
+    // 1. Validar reglas de negocio del pedido
+    $this->validator->validate($order);
 
-        // ---- 3. Persistencia (deberia ser un Repository) ----
-        // ❌ new adentro del metodo: no se puede reemplazar por un doble en pruebas
-        $order = new Order($id, $paciente, $total, $tipoPaciente);
-        $order->guardar();
+    // 2. Calcular el total final aplicando descuentos o recargos.
+    $order->total = $this->calculator->calculate($order->$amount, $order->type);
 
-        // ---- 4. Notificacion (deberia ser una Factory) ----
-        // ❌ MISMO if que ya existe en NotificationSender::enviar()
-        if ($tipoNotificacion === 'email') {
-            $email = new EmailNotification();
-            $email->enviarEmail($destino, 'Pedido creado', "Pedido {$id} por $ {$total}");
-        }
+    // 3. Persistir la orden en la base de datos a través del repositorio.
+    $this->orderRepository->save($order);
 
-        if ($tipoNotificacion === 'sms') {
-            $sms = new SmsNotification();
-            $sms->mandarSms($destino, "Pedido {$id} por $ {$total}");
-        }
-
-        // ---- 5. Avisos internos (deberia ser un Observer) ----
-        $eventos = new OrderEvents();
-        $eventos->pedidoCreado($order);
-
-        // ---- 6. Reporte (deberia ser un Decorator) ----
-        $generador = new ReportGenerator();
-        echo $generador->generate("Pedido {$id}", true, true, false) . '<br>';
-
-        // ---- 7. Presentacion (deberia ser una View) ----
-        echo "<p>Pedido {$id} procesado. Total: $ {$total}</p>";
-    }
+    // 4. Notificar y disparar eventos del sistema
+    $this->orderEvents->notify($order);
+}
 }
 
-/*
- * ============================================================================
- *  ✅ FORMA CORRECTA — FACADE SOBRE SERVICIOS COHESIVOS
- * ============================================================================
- *
- * final class OrderFacade
- * {
- *     public function __construct(
- *         private OrderValidator $validator,
- *         private PriceCalculator $calculator,
- *         private OrderRepository $repository,
- *         private OrderSubject $events
- *     ) {}
- *
- *     public function createOrder(Order $order): void
- *     {
- *         $this->validator->validate($order);
- *         $total = $this->calculator->calculate($order->amount);
- *         $this->repository->save($order);
- *         $this->events->notify($order);
- *     }
- * }
- *
- * El controlador queda en una linea:
- *   $facade->createOrder($order);
- *
- * Estructura:
- *   Controller -> OrderFacade -> Validator | Pricing | Repository | Events
- *
- * ----------------------------------------------------------------------------
- * EJERCICIO 6 (TP): dejar procesarPedidoCompleto() en menos de 10 lineas
- * sin que el sistema pierda ninguna funcionalidad.
- *
+
+
+/**
  * PREGUNTA PARA EL PR: Facade elimina la complejidad o la mueve de lugar?
- * ============================================================================
  */
