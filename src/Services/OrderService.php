@@ -72,9 +72,12 @@ class OrderService
         // ---- 4. Notificacion: un solo punto de creacion (Factory) ----
         (new NotificationSender())->enviar($tipoNotificacion, $destino, "Pedido {$id} por $ {$total}");
 
-        // ---- 5. Avisos internos (deberia ser un Observer) ----
+        // ---- 5. Avisos internos: cada interesado se suscribe (Observer) ----
         $eventos = new OrderEvents();
-        $eventos->pedidoCreado($order);
+        $eventos->attach(new EmailObserver());
+        $eventos->attach(new SmsObserver());
+        $eventos->attach(new DashboardObserver());
+        $eventos->notify($order);
 
         // ---- 6. Reporte (deberia ser un Decorator) ----
         $reporte = new PdfReportDecorator(new DigitalSignatureDecorator(new BasicReport("Pedido {$id}")));
