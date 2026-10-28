@@ -1,10 +1,4 @@
 <?php
-
-namespace App\Controllers; 
-
-use App\Models\Order; 
-use App\Services\OrderService;
-
 /**
  * ============================================================================
  *  CONTROLADOR DE PEDIDOS
@@ -27,50 +21,72 @@ use App\Services\OrderService;
  * ============================================================================
  */
 
-/**
- * Clase OrderController (MVC)
- * 
- * Única responsabilidad: Atender la petición HTTP, validar la entrada,
- * instanciar el modelo/fachada y redirigir a la vista correspondiente.
- */
-
-
-Class OrderController
+class OrderController
 {
-    public function __construct(
-        private OrderService $orderService
-    ) {}
-
     /**
-     * Procesa la creación de un pedido completo, delegando la lógica a la fachada.
+     * ❌ METODO MAL APLICADO: create()
+     *    Mezcla las tres capas de MVC dentro de un solo metodo.
      */
     public function create(): void
     {
-        // 1. Capturar y sanitizar entradas de formulario HTTP.
-        $amount = filter_input(INPUT_POST, 'amount', FILTER_VALIDATE_FLOAT);
-        $type = filter_input(INPUT_POST, 'type', FILTER_SANITIZE_SPECIAL_CHARS);
-        $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        // ❌ 1. Entrada sin validar ni sanitizar
+        $id       = (int) ($_GET['id'] ?? 1);
+        $paciente = $_GET['paciente'] ?? 'Juan Perez';
+        $monto    = (float) ($_GET['monto'] ?? 15000);
+        $tipo     = $_GET['tipo'] ?? 'obra_social';
 
-        // Si los datos son inválidos, ridirige con mensaje de error.
-        if (!$amount || !$type || !$email) {
-            header('Location: /index.php?action=create&error=invalid_data');
-            exit;
-        }
+        // ❌ 2. Regla de negocio dentro del controlador (deberia ser Strategy)
+        $total = $tipo === 'obra_social' ? $monto * 0.7 : $monto;
 
-        try {
-        // 2. Crear la entidad de dominio con los datos recibidos.
-        $order = new Order(amount: $amount, type: $type, userEmail: $email);
-        // 3. Delegar todo el procesamiento a la Fachada (En una sola línea).
-        $this->orderService->processOrder($order);
-        // 4. Redirigir a la vista de éxito.
-        header('Location: /index.php?action=list&status=success');
-        exit;
+        // ❌ 3. SQL dentro del controlador (deberia ser Repository)
+        $conexion = Connection::obtener();
+        $conexion->ejecutar("INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})");
 
-        } catch (Exception $e) {
-            // Manejo limpio de excepciones redirigiendo a la vista.
-            header('Location: /index.php?action=create&error=' . urlencode($e->getMessage()));
-            exit;
-        }
+        // ❌ 4. Notificacion resuelta otra vez con if (deberia ser Factory)
+        $notificador = new NotificationSender();
+        $notificador->enviar('email', 'paciente@mail.com', "Pedido {$id} creado");
+
+        // ❌ 5. HTML impreso desde el controlador (deberia ser una View)
+        echo "<h1>Pedido creado</h1>";
+        echo "<p>Paciente: {$paciente}</p>";       // ❌ ademas, sin escapar: XSS
+        echo "<p>Total: $ {$total}</p>";
+    }
+
+    /*
+     * ✅ FORMA CORRECTA:
+     *
+     * public function create(): void
+     * {
+     *     $order = new Order(
+     *         (int) $_POST['id'],
+     *         (string) $_POST['paciente'],
+     *         (float) $_POST['monto'],
+     *         (string) $_POST['tipo']
+     *     );
+     *
+     *     $this->facade->createOrder($order);          // toda la logica, una linea
+     *
+     *     require __DIR__ . '/../../views/orders.php'; // la vista solo presenta
+     * }
+     */
+
+    /**
+     * ❌ METODO MAL APLICADO: index()
+     *    Delega en la vista la consulta a la base de datos (ver views/orders.php).
+     */
+    public function index(): void
+    {
+        require __DIR__ . '/../../views/orders.php';
+    }
+
+    /**
+     * ❌ METODO MAL APLICADO: report()
+     *    Usa banderas booleanas ilegibles (ver ReportGenerator).
+     */
+    public function report(): void
+    {
+        $generador = new ReportGenerator();
+        echo $generador->generate('Pedidos del dia', true, true, true);
     }
 }
 
@@ -83,5 +99,3 @@ Class OrderController
  * de DISEÑO (Unidad 2) y cuales son deuda de PROCESO (Unidad 1)?
  * ----------------------------------------------------------------------------
  */
-
-
