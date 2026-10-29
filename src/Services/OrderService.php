@@ -52,6 +52,16 @@ class OrderService
         echo (new PdfReportDecorator(new DigitalSignatureDecorator(new BasicReport("Pedido {$id}"))))->generate() . '<br>';
         echo "<p>Pedido {$id} procesado. Total: $ {$total}</p>";
     }
+
+    /** Alta simple que usa el controlador: calcula, guarda y avisa por email. */
+    public function crearPedido(Order $order): float
+    {
+        $total = $this->pricing->total($order->amount, $order->patientType);
+        $this->repository->save($order);
+        $this->notificador->enviar('email', 'paciente@mail.com', "Pedido {$order->id} creado");
+
+        return $total;
+    }
 }
 
 /*
