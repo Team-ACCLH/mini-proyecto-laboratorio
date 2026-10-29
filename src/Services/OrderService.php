@@ -1,28 +1,29 @@
 <?php
 
-// Mientras no este el autoload (PR #4), se cargan a mano los decoradores que usa este archivo.
+// Mientras no este el autoload (PR #4), se cargan a mano
+// los decoradores que usa este archivo.
 require_once __DIR__ . '/../Reports/BasicReport.php';
 require_once __DIR__ . '/../Reports/DigitalSignatureDecorator.php';
 require_once __DIR__ . '/../Reports/PdfReportDecorator.php';
+
 /**
  * ============================================================================
- *  SERVICIO DE PEDIDOS
- *  Patron esperado: FACADE (estructural) + separacion en servicios cohesivos
+ * SERVICIO DE PEDIDOS
+ * Patron esperado: FACADE (estructural)
+ * + separacion en servicios cohesivos
  * ============================================================================
  *
- *  ❌ DEUDA SEMBRADA
- *     Un unico metodo procesarPedidoCompleto() que hace de todo:
- *     valida, calcula, cobra, guarda, notifica, reporta y ademas imprime HTML.
- *     Es la clase que nadie quiere tocar: cualquier cambio puede romper otra cosa.
- *     Ademas repite el if por tipo de notificacion que ya existe en NotificationSender.
+ * ❌ DEUDA SEMBRADA
+ * Un unico metodo procesarPedidoCompleto() que hace de todo:
+ * valida, calcula, cobra, guarda, notifica, reporta
+ * y ademas imprime HTML.
  *
- *  ✅ FORMA CORRECTA
- *     1. Cada paso en su propio servicio cohesivo (validacion, precio, pago...).
- *     2. Una fachada que ORQUESTA esos servicios en un metodo corto y legible.
- *     3. Las dependencias se inyectan por constructor, no se crean con new adentro.
+ * ✅ FORMA CORRECTA
+ * 1. Cada paso en su propio servicio cohesivo.
+ * 2. Una fachada que ORQUESTA esos servicios.
+ * 3. Las dependencias se inyectan por constructor.
  *
- *  ⚠️ Una fachada COORDINA. Si empieza a DECIDIR reglas de negocio, se convierte
- *     en la nueva clase que hace todo y volvimos al punto de partida.
+ * Una fachada COORDINA, no debe decidir reglas de negocio.
  * ============================================================================
  */
 
@@ -30,11 +31,10 @@ class OrderService
 {
     /**
      * ❌ METODO MAL APLICADO: procesarPedidoCompleto()
-     *    Sintomas medibles:
-     *      - mas de 6 responsabilidades en un solo metodo
-     *      - 4 niveles de anidamiento
-     *      - imposible de probar sin base de datos ni servidor de mail
-     *      - imprime HTML desde la capa de servicio (rompe MVC)
+     *
+     * Tiene demasiadas responsabilidades:
+     * validacion, precios, persistencia, notificaciones,
+     * eventos, reportes y presentacion.
      */
     public function procesarPedidoCompleto(
         int $id,
@@ -44,9 +44,10 @@ class OrderService
         string $tipoNotificacion,
         string $destino
     ): void {
-        // ---- 1. Validacion (deberia estar en su propio validador) ----
+
+        // ---- 1. Validacion ----
         if (trim($paciente) === '') {
-            echo 'Falta el paciente<br>';   // ❌ la capa de servicio imprime HTML
+            echo 'Falta el paciente<br>';
             return;
         }
 
@@ -55,42 +56,61 @@ class OrderService
             return;
         }
 
-        // ---- 2. Calculo de precio (deberia ser una Strategy) ----
+        // ---- 2. Calculo de precio ----
+        // Esta parte sera refactorizada por otro integrante.
         $total = $monto;
 
         if ($tipoPaciente === 'obra_social') {
-            $total = $monto * 0.7;          // ❌ tercera copia del 0.7 en el proyecto
+            $total = $monto * 0.7;
         } elseif ($tipoPaciente === 'jubilado') {
             $total = $monto * 0.5;
         }
 
-        // ---- 3. Persistencia (deberia ser un Repository) ----
-        // ❌ new adentro del metodo: no se puede reemplazar por un doble en pruebas
-        $order = new Order($id, $paciente, $total, $tipoPaciente);
-        $order->guardar();
+        // ---- 3. Persistencia mediante Repository ----
+        $order = new Order(
+            $id,
+            $paciente,
+            $total,
+            $tipoPaciente
+        );
 
-        // ---- 4. Notificacion: un solo punto de creacion (Factory) ----
-        (new NotificationSender())->enviar($tipoNotificacion, $destino, "Pedido {$id} por $ {$total}");
+        // ✅ PATRON REPOSITORY
+        // El repositorio se encarga de guardar el pedido.
+        (new OrderRepository())->save($order);
 
-        // ---- 5. Avisos internos: cada interesado se suscribe (Observer) ----
+        // ---- 4. Notificacion mediante Factory ----
+        (new NotificationSender())->enviar(
+            $tipoNotificacion,
+            $destino,
+            "Pedido {$id} por $ {$total}"
+        );
+
+        // ---- 5. Avisos internos mediante Observer ----
         $eventos = new OrderEvents();
+
         $eventos->attach(new EmailObserver());
         $eventos->attach(new SmsObserver());
         $eventos->attach(new DashboardObserver());
+
         $eventos->notify($order);
 
-        // ---- 6. Reporte (deberia ser un Decorator) ----
-        $reporte = new PdfReportDecorator(new DigitalSignatureDecorator(new BasicReport("Pedido {$id}")));
+        // ---- 6. Reporte mediante Decorator ----
+        $reporte = new PdfReportDecorator(
+            new DigitalSignatureDecorator(
+                new BasicReport("Pedido {$id}")
+            )
+        );
+
         echo $reporte->generate() . '<br>';
 
-        // ---- 7. Presentacion (deberia ser una View) ----
+        // ---- 7. Presentacion ----
         echo "<p>Pedido {$id} procesado. Total: $ {$total}</p>";
     }
 }
 
-/*
+/**
  * ============================================================================
- *  ✅ FORMA CORRECTA — FACADE SOBRE SERVICIOS COHESIVOS
+ * ✅ FORMA CORRECTA — FACADE SOBRE SERVICIOS COHESIVOS
  * ============================================================================
  *
  * final class OrderFacade
@@ -112,15 +132,16 @@ class OrderService
  * }
  *
  * El controlador queda en una linea:
- *   $facade->createOrder($order);
+ * $facade->createOrder($order);
  *
  * Estructura:
- *   Controller -> OrderFacade -> Validator | Pricing | Repository | Events
+ * Controller -> OrderFacade -> Validator | Pricing | Repository | Events
  *
- * ----------------------------------------------------------------------------
- * EJERCICIO 6 (TP): dejar procesarPedidoCompleto() en menos de 10 lineas
- * sin que el sistema pierda ninguna funcionalidad.
+ * EJERCICIO 6 (TP):
+ * Dejar procesarPedidoCompleto() en menos de 10 lineas
+ * sin perder funcionalidad.
  *
- * PREGUNTA PARA EL PR: Facade elimina la complejidad o la mueve de lugar?
+ * PREGUNTA PARA EL PR:
+ * Facade elimina la complejidad o la mueve de lugar?
  * ============================================================================
  */
