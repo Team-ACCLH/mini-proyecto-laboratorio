@@ -100,6 +100,23 @@ El PR revisado por otro grupo es evidencia del TP Integrador.
 
 ---
 
+## Verificar que no se rompió nada
+
+Antes de abrir o mergear un PR, desde la carpeta del proyecto (Linux, macOS o
+Git Bash en Windows; necesita `php` en la terminal):
+
+```bash
+bash tests/verificar.sh
+```
+
+El script revisa la sintaxis de todos los `.php`, ejecuta `crear`, `listar`,
+`reporte` y una acción inexistente, y compara la salida con la del proyecto
+original guardada en `tests/esperado/` (ignora los espacios del HTML). Al
+final muestra dónde sigue escrito el `0.7`. Termina con `RESULTADO: OK` si la
+app hace lo mismo que antes.
+
+---
+
 ## Contributing
 
 | Integrante | Ejercicios | Ramas |
