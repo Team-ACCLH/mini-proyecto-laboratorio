@@ -54,7 +54,7 @@ class OrderEvents
  * {
  *     public function update(Order $order): void
  *     {
- *         echo "Email enviado para el pedido {$order->id}";
+ *         (new NotificationSender())->enviar('email', 'paciente@mail.com', "Pedido {$order->id}");
  *     }
  * }
  *
