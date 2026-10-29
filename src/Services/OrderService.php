@@ -61,7 +61,30 @@ class OrderService
         $this->notificador->enviar('email', 'paciente@mail.com', "Pedido {$order->id} creado");
 
         return $total;
+    }   
+    /**
+     * Obtiene los pedidos y prepara los datos para la vista MVC.
+     * El cálculo del total se delega a OrderPricing (Strategy).
+     */
+    public function listarPedidos(): array
+    {
+        $pedidos = [];
+
+        foreach ($this->repository->all() as $order) {
+            $pedidos[] = [
+                'id' => $order->id,
+                'paciente' => $order->patient,
+                'total' => $this->pricing->total(
+                    $order->amount,
+                    $order->patientType
+                ),
+            ];
+        }
+
+        return $pedidos;
     }
+
+    
 }
 
 /*

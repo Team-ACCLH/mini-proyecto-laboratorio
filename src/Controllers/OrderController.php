@@ -29,10 +29,14 @@ class OrderController
         require __DIR__ . '/../../views/order_created.php';
     }
 
-    public function index(): void
-    {
-        require __DIR__ . '/../../views/orders.php';
-    }
+    
+     public function index(): void
+{
+    $pedidos = $this->service->listarPedidos();
+
+    require __DIR__ . '/../../views/orders.php';
+}
+
 
     /**
      * ✅ report(): el reporte se arma encadenando decoradores,
