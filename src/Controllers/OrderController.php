@@ -1,12 +1,13 @@
 <?php
 /**
  * ============================================================================
- *  CONTROLADOR DE PEDIDOS
- *  Patron: MVC (arquitectonico) + SRP
+ * CONTROLADOR DE PEDIDOS
+ * Patron: MVC (arquitectonico) + SRP
  * ============================================================================
  *
- *  ✅ El controlador solo: recibe la entrada, llama a UN servicio
- *     y elige que vista renderizar. Sin SQL, sin reglas de negocio y sin echo.
+ * El controlador recibe la entrada, llama al servicio
+ * y elige que vista renderizar.
+ * Sin SQL ni reglas de negocio.
  * ============================================================================
  */
 
@@ -24,32 +25,35 @@ class OrderController
             (float) ($_GET['monto'] ?? 15000),
             (string) ($_GET['tipo'] ?? 'obra_social')
         );
+
         $total = $this->service->crearPedido($order);
 
         require __DIR__ . '/../../views/order_created.php';
     }
 
-    
-     public function index(): void
-{
-    $pedidos = $this->service->listarPedidos();
+    public function index(): void
+    {
+        $pedidos = $this->service->listarPedidos();
 
-    require __DIR__ . '/../../views/orders.php';
-}
-
+        require __DIR__ . '/../../views/orders.php';
+    }
 
     /**
-     * ✅ report(): el reporte se arma encadenando decoradores,
-     *    sin banderas booleanas.
+     * report(): el reporte se arma encadenando decoradores,
+     * sin banderas booleanas.
      */
     public function report(): void
     {
-        // Decorator: cada agregado envuelve al anterior. El orden importa.
+        // Decorator: cada agregado envuelve al anterior.
+        // El orden importa.
         $reporte = new WatermarkDecorator(
             new PdfReportDecorator(
-                new DigitalSignatureDecorator(new BasicReport('Pedidos del dia'))
+                new DigitalSignatureDecorator(
+                    new BasicReport('Pedidos del dia')
+                )
             )
         );
+
         echo $reporte->generate();
     }
 }
