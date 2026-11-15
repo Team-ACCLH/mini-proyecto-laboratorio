@@ -19,3 +19,20 @@
 | CP-27 | Crear pedido devuelve total y envia email | Autoload cargado | Order(10, "Ana Lopez", 15000, obra_social) | 1. crearPedido() | Devuelve 10500 e imprime el email del pedido 10 | Positivo | OrderServiceTest::testCrearPedidoDevuelveTotalYEnviaEmail | Pasa |
 | CP-28 | Pedido sin paciente se rechaza | Autoload cargado | paciente = "" | 1. procesarPedidoCompleto() | Imprime "Falta el paciente" y nada mas | Negativo | OrderServiceTest::testProcesarSinPacienteMuestraErrorYNoSigue | Pasa |
 | CP-29 | Pedido con monto negativo se rechaza | Autoload cargado | monto = -100 | 1. procesarPedidoCompleto() | Imprime "Monto invalido" | Negativo | OrderServiceTest::testProcesarConMontoNegativoMuestraError | Pasa |
+
+## Repository: OrderRepository
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-30 | save() registra el INSERT del pedido | Connection en memoria | Order(9, "Test", 100, particular) | 1. Contar consultas 2. save() 3. Leer la ultima | Una consulta mas; INSERT con id 9 | Positivo | OrderRepositoryTest::testSaveRegistraLaConsultaDeInsert | Pasa |
+| CP-31 | all() devuelve objetos Order | Datos de ejemplo en memoria | Ninguno | 1. all() | 2 elementos, todos Order; el primero es Juan Perez | Positivo | OrderRepositoryTest::testAllDevuelveLosPedidosComoObjetosOrder | Pasa |
+| CP-32 | Nombre con comilla queda sin escapar | Connection en memoria | paciente = "O'Brien" | 1. save() 2. Leer la ultima consulta | La consulta contiene 'O'Brien' (riesgo de inyeccion SQL, registrado como deuda) | Negativo | OrderRepositoryTest::testNombreConComillaQuedaSinEscaparEnLaConsulta | Pasa |
+
+## Observer: OrderEvents y observadores
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-33 | Un observador suscripto recibe el pedido | Observador espia | Order 5 | 1. attach() 2. notify() | Recibe 1 aviso con el mismo pedido | Positivo | OrderEventsTest::testObservadorSuscriptoRecibeElPedido | Pasa |
+| CP-34 | Todos los observadores reciben el aviso | Dos espias | Order 6 | 1. attach() x2 2. notify() | Cada uno recibe 1 aviso | Positivo | OrderEventsTest::testTodosLosObservadoresRecibenElAviso | Pasa |
+| CP-35 | Notificar sin observadores no falla | Ninguna | Order 7 | 1. notify() sin attach | No lanza error | Negativo | OrderEventsTest::testNotificarSinObservadoresNoFalla | Pasa |
+| CP-36 | El dashboard muestra el aviso | Ninguna | Order 5 | 1. DashboardObserver::update() | "[DASHBOARD] actualizado para el pedido 5" | Positivo | OrderEventsTest::testDashboardObserverMuestraElAviso | Pasa |
