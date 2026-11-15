@@ -65,6 +65,9 @@
 | CP-34 | Todos los observadores reciben el aviso | Dos espias | Order 6 | 1. attach() x2 2. notify() | Cada uno recibe 1 aviso | Positivo | OrderEventsTest::testTodosLosObservadoresRecibenElAviso | Pasa |
 | CP-35 | Notificar sin observadores no falla | Ninguna | Order 7 | 1. notify() sin attach | No lanza error | Negativo | OrderEventsTest::testNotificarSinObservadoresNoFalla | Pasa |
 | CP-36 | El dashboard muestra el aviso | Ninguna | Order 5 | 1. DashboardObserver::update() | "[DASHBOARD] actualizado para el pedido 5" | Positivo | OrderEventsTest::testDashboardObserverMuestraElAviso | Pasa |
+| CP-37 | EmailObserver envia email al paciente | Ninguna | Order 5 | 1. EmailObserver::update() | Email al paciente del pedido 5 | Positivo | NotificationObserversTest::testEmailObserverEnviaEmailAlPaciente | Fallaba (defecto #35), pasa tras el fix |
+| CP-38 | SmsObserver envia SMS al paciente | Ninguna | Order 5 | 1. SmsObserver::update() | "[SMS] a 3704000000: Pedido 5 creado" | Positivo | NotificationObserversTest::testSmsObserverEnviaSmsAlPaciente | Fallaba (defecto #35), pasa tras el fix |
+| CP-39 | Pedido completo avisa a todos los observadores | Observadores reales | Pedido 20, obra social, 15000 | 1. procesarPedidoCompleto() | Salida con SMS, dashboard y "Pedido 20 procesado" | Positivo | NotificationObserversTest::testProcesarPedidoCompletoAvisaATodosLosObservadores | Fallaba (defecto #35), pasa tras el fix |
 
 ## Factory: NotificationFactory
 
