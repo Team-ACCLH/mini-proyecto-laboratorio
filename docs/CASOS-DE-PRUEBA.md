@@ -1,5 +1,25 @@
 # Casos de prueba
 
+## Adapter: LegacyNotifierAdapter
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-10 | El adapter cumple el contrato Notification | Autoload cargado | LegacyNotifier real | 1. Crear el adapter 2. Verificar su tipo | Es instancia de Notification | Positivo | LegacyNotifierAdapterTest::testElAdapterImplementaNotification | Pasa |
+| CP-11 | send() muestra el mensaje con formato legacy | Autoload cargado | "Pedido 1 creado" | 1. Crear el adapter 2. Llamar send() | Imprime "[LEGACY] Pedido 1 creado<br>" | Positivo | LegacyNotifierAdapterTest::testSendMuestraElMensajeConFormatoLegacy | Pasa |
+| CP-12 | send() delega en sendMessage() | Mock de LegacyNotifier | "hola" | 1. Crear mock 2. Crear adapter con el mock 3. Llamar send() | sendMessage() recibe "hola" una sola vez | Positivo | LegacyNotifierAdapterTest::testSendDelegaEnSendMessage | Pasa |
+| CP-13 | Mensaje vacio no rompe el adapter | Autoload cargado | "" (vacio) | 1. Crear el adapter 2. Llamar send("") | Imprime "[LEGACY] <br>" sin error | Negativo | LegacyNotifierAdapterTest::testMensajeVacioNoLanzaError | Pasa |
+| CP-14 | Rechaza un objeto que no es LegacyNotifier | Autoload cargado | new stdClass() | 1. Crear el adapter con stdClass | Lanza TypeError | Negativo | LegacyNotifierAdapterTest::testNoAceptaOtroObjetoQueNoSeaLegacyNotifier | Pasa |
+
+## Decorator: reportes
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-15 | Reporte base sin decorar | Autoload cargado | "Pedidos del dia" | 1. Crear BasicReport 2. Llamar generate() | "Reporte: Pedidos del dia" | Positivo | ReportDecoratorTest::testReporteBasicoSinDecorar | Pasa |
+| CP-16 | Un decorador agrega su parte | Autoload cargado | "Pedidos del dia" | 1. Envolver en PdfReportDecorator 2. Llamar generate() | "Reporte: Pedidos del dia + PDF" | Positivo | ReportDecoratorTest::testUnDecoradorAgregaSuParte | Pasa |
+| CP-17 | Cadena completa del controlador | Autoload cargado | "Pedidos del dia" | 1. Aplicar firma, PDF y marca de agua 2. Llamar generate() | "... + firma digital + PDF + marca de agua" | Positivo | ReportDecoratorTest::testCadenaCompletaDelControlador | Pasa |
+| CP-18 | El orden de los decoradores cambia el resultado | Autoload cargado | "X" | 1. Firma y luego PDF 2. PDF y luego firma 3. Comparar | Los dos textos son distintos | Negativo | ReportDecoratorTest::testElOrdenDeLosDecoradoresCambiaElResultado | Pasa |
+| CP-19 | Un decorador rechaza algo que no es Report | Autoload cargado | new stdClass() | 1. Crear WatermarkDecorator con stdClass | Lanza TypeError | Negativo | ReportDecoratorTest::testUnDecoradorNoAceptaAlgoQueNoSeaReport | Pasa |
+
 ## Strategy: calculo de precios
 
 | ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
