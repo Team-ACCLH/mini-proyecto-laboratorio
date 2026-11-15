@@ -1,5 +1,14 @@
 # Casos de prueba
 
+## Validacion: OrderValidator
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-01 | Un pedido con paciente y monto validos no tiene error | Autoload cargado | paciente "Juan Perez", monto 15000 | 1. Crear OrderValidator 2. Llamar validar() | Devuelve null (sin error) | Positivo | OrderValidatorTest::testPedidoValidoNoDevuelveError | Pasa |
+| CP-02 | Un paciente con solo espacios se rechaza | Autoload cargado | paciente "   ", monto 15000 | 1. Crear OrderValidator 2. Llamar validar() | Devuelve "Falta el paciente" | Negativo | OrderValidatorTest::testPacienteVacioDevuelveError | Pasa |
+| CP-03 | Un monto en cero se rechaza | Autoload cargado | paciente "Juan Perez", monto 0 | 1. Crear OrderValidator 2. Llamar validar() | Devuelve "Monto invalido" | Negativo | OrderValidatorTest::testMontoCeroDevuelveError | Pasa |
+| CP-04 | Un monto negativo se rechaza | Autoload cargado | paciente "Juan Perez", monto -500 | 1. Crear OrderValidator 2. Llamar validar() | Devuelve "Monto invalido" | Negativo | OrderValidatorTest::testMontoNegativoDevuelveError | Pasa |
+
 ## Adapter: LegacyNotifierAdapter
 
 | ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
