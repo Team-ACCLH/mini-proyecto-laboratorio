@@ -8,3 +8,4 @@
 | Conexión nueva abierta en el servidor por cada consulta SQL ejecutada | `Connection.php:35` | Diseño (Unidad 2) | Singleton | Introduce un estado global en memoria difícil de mockear en tests. |
 | Bloques condicionales if repetidos por tipo de aviso en 3 archivos | `NotificationSender.php:28` | Diseño (Unidad 2) | Factory | Acoplamiento indirecto hacia una firma o contrato global estricto. |
 | El controlador maneja consultas de datos e imprime HTML directo | `OrderController.php:37` | Diseño (Unidad 2) | MVC + Facade | Mayor fraccionamiento de código para resolver flujos muy simples. |
+| SQL armado concatenando texto (CP-32) | `src/Repositories/OrderRepository.php:12` | Seguridad | No aplicado (propuesta: consultas preparadas con PDO) | Riesgo de inyección SQL por datos sin escapar. |
