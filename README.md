@@ -1,7 +1,9 @@
 # laboratorio-pedidos — proyecto de práctica
+[![CI](https://github.com/Team-ACCLH/mini-proyecto-laboratorio/actions/workflows/ci.yml/badge.svg)](https://github.com/Team-ACCLH/mini-proyecto-laboratorio/actions/workflows/ci.yml)
 
 Sistema de gestión de pedidos de un laboratorio de análisis clínicos.
-**PHP Vanilla, sin frameworks, sin Composer.** Corre en XAMPP tal cual está.
+**PHP Vanilla, sin frameworks.** Corre en XAMPP tal cual está. Composer se usa solo para las
+herramientas de desarrollo (pruebas y estilo).
 
 > ⚠️ **Este proyecto está roto a propósito.**
 > Cada archivo contiene deuda técnica sembrada, marcada con comentarios:
@@ -33,6 +35,26 @@ Acciones disponibles:
 La persistencia está simulada en memoria para que el proyecto arranque sin
 configurar MySQL. Eso **no** es parte de la deuda a corregir.
 
+---
+
+## Pruebas y CI
+
+Requisitos: PHP 8.2 o superior y Composer.
+
+```bash
+composer install   # instala PHPUnit y PHP_CodeSniffer en vendor/
+composer test      # corre las pruebas unitarias (tests/Unit)
+composer lint      # revisa el estilo PSR-12
+```
+
+- **Pruebas:** PHPUnit 11.5, una clase de prueba por patrón refactorizado.
+- **Casos de prueba documentados:** [`docs/CASOS-DE-PRUEBA.md`](docs/CASOS-DE-PRUEBA.md)
+  (ID, precondiciones, datos, pasos, resultado esperado; positivos y negativos).
+- **Integración continua:** GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
+  corre en cada push y en cada Pull Request: instala dependencias, ejecuta el lint y las pruebas.
+- **Ramas protegidas:** `develop` y `main` solo aceptan cambios por Pull Request con 1 aprobación
+  y el check `calidad` en verde.
+  
 ---
 
 ## Mapa de deudas
