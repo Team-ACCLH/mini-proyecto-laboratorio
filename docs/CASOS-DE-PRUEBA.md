@@ -36,3 +36,23 @@
 | CP-34 | Todos los observadores reciben el aviso | Dos espias | Order 6 | 1. attach() x2 2. notify() | Cada uno recibe 1 aviso | Positivo | OrderEventsTest::testTodosLosObservadoresRecibenElAviso | Pasa |
 | CP-35 | Notificar sin observadores no falla | Ninguna | Order 7 | 1. notify() sin attach | No lanza error | Negativo | OrderEventsTest::testNotificarSinObservadoresNoFalla | Pasa |
 | CP-36 | El dashboard muestra el aviso | Ninguna | Order 5 | 1. DashboardObserver::update() | "[DASHBOARD] actualizado para el pedido 5" | Positivo | OrderEventsTest::testDashboardObserverMuestraElAviso | Pasa |
+
+## Factory: NotificationFactory
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-40 | "email" crea un EmailChannel | Autoload cargado | tipo = "email" | 1. make("email") | EmailChannel que cumple NotificationChannel | Positivo | NotificationFactoryTest::testEmailDevuelveEmailChannel | Pasa |
+| CP-41 | "sms" crea un SmsChannel | Autoload cargado | tipo = "sms" | 1. make("sms") | SmsChannel | Positivo | NotificationFactoryTest::testSmsDevuelveSmsChannel | Pasa |
+| CP-42 | Canal no soportado se rechaza | Autoload cargado | tipo = "whatsapp" | 1. make("whatsapp") | InvalidArgumentException: "El canal [whatsapp] no esta soportado." | Negativo | NotificationFactoryTest::testCanalDesconocidoLanzaExcepcion | Pasa |
+| CP-43 | El tipo distingue mayusculas | Autoload cargado | tipo = "EMAIL" | 1. make("EMAIL") | InvalidArgumentException | Negativo | NotificationFactoryTest::testTipoEnMayusculasSeRechaza | Pasa |
+| CP-44 | El sender envia por el canal pedido | Autoload cargado | "sms", "3704000000", "Hola" | 1. NotificationSender::enviar() | `[SMS] a 3704000000: Hola<br>` | Positivo | NotificationFactoryTest::testSenderEnviaPorElCanalPedido | Pasa |
+
+## Singleton: Connection
+
+| ID | Descripcion | Precondiciones | Datos de entrada | Pasos | Resultado esperado | Tipo | Prueba automatizada | Estado |
+|---|---|---|---|---|---|---|---|---|
+| CP-45 | Siempre la misma instancia | Ninguna | Ninguno | 1. getInstance() dos veces 2. Comparar | Es el mismo objeto | Positivo | ConnectionTest::testGetInstanceDevuelveSiempreLaMismaInstancia | Pasa |
+| CP-46 | El constructor es privado | Ninguna | Ninguno | 1. Inspeccionar __construct con Reflection | isPrivate() es verdadero | Positivo | ConnectionTest::testElConstructorEsPrivado | Pasa |
+| CP-47 | No se puede crear con new | Ninguna | Ninguno | 1. new Connection() | Lanza Error por constructor privado | Negativo | ConnectionTest::testNoSePuedeCrearConNew | Pasa |
+| CP-48 | La consulta se ve desde cualquier referencia | Ninguna | "SELECT 1" | 1. Contar consultas 2. ejecutar() desde otra referencia 3. Volver a contar | Una consulta mas, la ultima es "SELECT 1" | Positivo | ConnectionTest::testLaConsultaEjecutadaSeVeDesdeCualquierReferencia | Pasa |
+
