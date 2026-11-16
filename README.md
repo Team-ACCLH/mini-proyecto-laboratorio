@@ -20,9 +20,53 @@ herramientas de desarrollo (pruebas y estilo).
 
 ## Cómo levantarlo
 
+No hace falta MySQL ni crear `config/database.php`: la persistencia está simulada en
+memoria y, si `config/database.php` no existe, `public/index.php` usa la plantilla
+`config/database.example.php`. Composer **no** hace falta para ver la app, solo para
+correr las pruebas y el lint (ver más abajo).
+
+### Windows (XAMPP)
+
 1. Copiar la carpeta dentro de `C:\xampp\htdocs\`.
 2. Iniciar Apache desde el panel de XAMPP (MySQL **no** hace falta).
 3. Abrir: `http://localhost/mini-proyecto-laboratorio/public/index.php`
+
+### Linux (servidor embebido de PHP)
+
+En Linux no hace falta XAMPP: PHP trae un servidor web propio para desarrollo
+(`php -S`) que cumple el papel de Apache. Los comandos son para Debian/Ubuntu.
+
+1. Instalar PHP 8.2 o superior y las herramientas:
+
+   ```bash
+   sudo apt update
+   sudo apt install php-cli php-xml php-mbstring unzip git composer
+   php -v   # tiene que mostrar 8.2 o más
+   ```
+
+   Ubuntu 24.04 trae PHP 8.3. Ubuntu 22.04 trae PHP 8.1, que **no alcanza**: hay que
+   instalar una versión más nueva (por ejemplo desde el PPA `ondrej/php`).
+
+2. Clonar el repositorio en la rama de trabajo:
+
+   ```bash
+   git clone -b develop https://github.com/Team-ACCLH/mini-proyecto-laboratorio.git
+   cd mini-proyecto-laboratorio
+   ```
+
+3. Levantar el servidor con `public/` como raíz del sitio:
+
+   ```bash
+   php -S localhost:8000 -t public
+   ```
+
+   La terminal queda ocupada mostrando cada request; se frena con `Ctrl+C`.
+
+4. Abrir: `http://localhost:8000/?accion=crear`
+
+En Linux, las URLs de la tabla de abajo quedan como `http://localhost:8000/?accion=...`
+(sin el prefijo `mini-proyecto-laboratorio/public/`). Los datos del pedido se pueden
+cambiar desde la URL, por ejemplo `?accion=crear&tipo=jubilado&monto=10000`.
 
 Acciones disponibles:
 
@@ -30,7 +74,7 @@ Acciones disponibles:
 |---|---|
 | `public/index.php?accion=crear` | Crea un pedido pasando por toda la deuda |
 | `public/index.php?accion=listar` | Lista pedidos desde la vista |
-| `public/index.php?accion=reporte` | Genera un reporte con banderas booleanas |
+| `public/index.php?accion=reporte` | Genera un reporte encadenando decoradores |
 
 La persistencia está simulada en memoria para que el proyecto arranque sin
 configurar MySQL. Eso **no** es parte de la deuda a corregir.
@@ -67,7 +111,7 @@ composer lint      # revisa el estilo PSR-12
 | `src/Pricing/PriceCalculator.php` | `switch` con todos los algoritmos + lógica duplicada | **Strategy** | Ej. 1 |
 | `src/Events/OrderEvents.php` | Avisos encadenados a mano a clases concretas | **Observer** | Ej. 5 |
 | `src/Legacy/LegacyNotifier.php` | Clase de terceros modificada + copia y pega | **Adapter** | Ej. 3 |
-| `src/Reports/ReportGenerator.php` | Parámetros booleanos (`boolean trap`) | **Decorator** | Ej. 4 |
+| `src/Reports/` | Parámetros booleanos (`boolean trap`) | **Decorator** | Ej. 4 |
 | `src/Services/OrderService.php` | Método que hace de todo | **Facade** + SRP | Ej. 6 |
 | `src/Controllers/OrderController.php` | SQL + negocio + HTML en el controlador | **MVC** + SRP | Ej. 7 |
 | `src/Models/Order.php` | Modelo que se persiste y calcula precios | **Repository** + Strategy | — |
